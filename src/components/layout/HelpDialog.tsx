@@ -118,6 +118,44 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
                         </div>
                     </section>
 
+                    {/* Rich Text Editor */}
+                    <section className="space-y-3">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                            <Keyboard className="w-5 h-5 text-emerald-500" />
+                            Rich Text Editor
+                        </h3>
+                        <div className="space-y-3">
+                            <div className="flex items-start gap-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                                <div className="text-2xl mt-0.5 flex-shrink-0">/</div>
+                                <div>
+                                    <p className="font-medium text-emerald-700 dark:text-emerald-400">Slash Commands</p>
+                                    <p className="text-sm text-muted-foreground mb-2">
+                                        Type <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">/</kbd> in any note to open the command menu.
+                                        Insert headings, lists, tables, code blocks, and more!
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                                        <div>• Heading 1, 2, 3</div>
+                                        <div>• Bullet List</div>
+                                        <div>• Ordered List</div>
+                                        <div>• Task List</div>
+                                        <div>• Table (3×3)</div>
+                                        <div>• Code Block</div>
+                                        <div>• Divider</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                                <MousePointer2 className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-medium">Text Formatting</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Select any text to see a floating menu with formatting options: Bold, Italic, Strikethrough, Code, and Link.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                     {/* Core Features */}
                     <section className="space-y-3">
                         <h3 className="text-lg font-semibold flex items-center gap-2">
