@@ -145,6 +145,19 @@ body {
   margin: 1.5rem 0;
 }
 
+/* List styling - make bullets more prominent */
+.prose ul>li::marker,
+.prose ol>li::marker {
+  color: currentColor;
+  opacity: 0.8;
+  font-weight: bold;
+}
+
+.prose ul>li,
+.prose ol>li {
+  opacity: 1;
+}
+
 /* Task list styling */
 .prose ul[data-type="taskList"] {
   list-style: none;
