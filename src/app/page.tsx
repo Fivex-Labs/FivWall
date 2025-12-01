@@ -9,8 +9,10 @@ import { FullscreenNote } from "@/components/wall/FullscreenNote";
 import { ColorFilter } from "@/components/layout/ColorFilter";
 import { MobileBlocker } from "@/components/layout/MobileBlocker";
 
+import { cn } from "@/lib/utils";
+
 export default function Home() {
-  const { currentView } = useNoteStore();
+  const { currentView, isSidebarCollapsed } = useNoteStore();
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
@@ -18,7 +20,12 @@ export default function Home() {
       <SearchCommand />
       <ColorFilter />
       <Sidebar />
-      <main className="flex-1 relative ml-16 md:ml-64 h-full overflow-hidden">
+      <main
+        className={cn(
+          "flex-1 relative h-full overflow-hidden transition-all duration-300 ease-in-out",
+          isSidebarCollapsed ? "ml-16" : "ml-16 md:ml-64"
+        )}
+      >
         {currentView === 'wall' ? <Canvas /> : <Board />}
         <FullscreenNote />
       </main>

@@ -35,4 +35,7 @@ export interface NoteStore {
 
     _hasHydrated: boolean;
     setHasHydrated: (state: boolean) => void;
+
+    isSidebarCollapsed: boolean;
+    toggleSidebar: () => void;
 }

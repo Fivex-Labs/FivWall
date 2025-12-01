@@ -147,6 +147,9 @@ export const useNoteStore = create<NoteStore>()(
 
             _hasHydrated: false,
             setHasHydrated: (state) => set({ _hasHydrated: state }),
+
+            isSidebarCollapsed: false,
+            toggleSidebar: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
         }),
         {
             name: 'fivwall-storage',
