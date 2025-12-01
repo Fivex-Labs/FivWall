@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useNoteStore } from "@/store/useNoteStore";
 import { NoteEditor, NoteEditorHandle } from "@/components/editor/NoteEditor";
-import { X, Minimize2, Paperclip, Tag, Palette } from "lucide-react";
+import { X, Minimize2, Paperclip, Tag, Palette, GripVertical, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,25 +99,30 @@ export function FullscreenNote() {
                     {/* Header */}
                     <div className={cn("flex items-center justify-between px-4 py-2", isLightColor(note.color) ? "bg-black/5" : "bg-white/5")}>
                         <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleClose}
-                                className={cn("gap-2", textColorClass, hoverBgClass)}
+                            {/* <button
+                                className={cn("p-2 rounded hover:bg-black/10 transition-colors", textColorClass)}
+                                onClick={() => setFullscreenNoteId(null)}
+                                title="Drag to move"
                             >
-                                <Minimize2 className="w-4 h-4" />
-                                Minimize
-                            </Button>
+                                <GripVertical className="w-5 h-5" />
+                            </button> */}
+                            <button
+                                className={cn("p-2 rounded hover:bg-black/10 transition-colors", textColorClass)}
+                                onClick={() => setFullscreenNoteId(null)}
+                                title="Minimize"
+                            >
+                                <Minimize2 className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2">
                             <Popover>
                                 <PopoverTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className={cn("gap-2", textColorClass, hoverBgClass)}
+                                    <button
+                                        className={cn("p-2 rounded hover:bg-black/10 transition-colors", textColorClass)}
+                                        title="Change color"
                                     >
-                                        <Palette className="w-4 h-4" />
-                                        Color
-                                    </Button>
+                                        <Palette className="w-5 h-5" />
+                                    </button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-2">
                                     <div className="grid grid-cols-4 gap-2">
@@ -137,29 +142,39 @@ export function FullscreenNote() {
                                     </div>
                                 </PopoverContent>
                             </Popover>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <button
+                                        className={cn("p-2 rounded hover:bg-red-500/20 transition-colors opacity-50 hover:opacity-100", textColorClass)}
+                                        title="Delete note"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
+                                </DialogTrigger>
+                                <DialogContent className="z-[10000]">
+                                    <DialogHeader>
+                                        <DialogTitle>Delete Note?</DialogTitle>
+                                        <DialogDescription>
+                                            Are you sure you want to delete this note? This action cannot be undone.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button variant="outline">Cancel</Button>
+                                        </DialogClose>
+                                        <Button
+                                            variant="destructive"
+                                            onClick={() => {
+                                                deleteNote(note.id);
+                                                setFullscreenNoteId(null);
+                                            }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </div>
-
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <button className={cn("p-2 rounded-full transition-colors", hoverBgClass, textColorClass)}>
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </DialogTrigger>
-                            <DialogContent className="z-[10000]">
-                                <DialogHeader>
-                                    <DialogTitle>Delete Note?</DialogTitle>
-                                    <DialogDescription>
-                                        This action cannot be undone. Are you sure you want to delete this note?
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button variant="outline">Cancel</Button>
-                                    </DialogClose>
-                                    <Button variant="destructive" onClick={() => { deleteNote(note.id); handleClose(); }}>Delete</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
                     </div>
 
                     {/* Content */}

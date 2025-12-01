@@ -71,7 +71,7 @@ export function Canvas() {
       <Button
         variant="default"
         size="sm"
-        className="fixed bottom-4 right-4 z-[10000] shadow-lg opacity-80 hover:opacity-100 border-2 border-black"
+        className="fixed bottom-4 right-4 z-[10] shadow-lg opacity-80 hover:opacity-100 border-2 border-black"
         onClick={organizeNotes}
         title="Reorder Notes"
       >

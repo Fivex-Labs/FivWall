@@ -24,6 +24,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { NOTE_COLORS } from "@/constants/colors";
+import { NoteEditor } from "@/components/editor/NoteEditor";
 
 function KanbanCard({ note }: { note: Note }) {
     const { updateNote, deleteNote, setFullscreenNoteId } = useNoteStore();
@@ -81,6 +82,10 @@ function KanbanCard({ note }: { note: Note }) {
     const removeTag = (tagToRemove: string) => {
         const updatedTags = (note.tags || []).filter(tag => tag !== tagToRemove);
         updateNote(note.id, { tags: updatedTags });
+    };
+
+    const handleContentChange = (content: string) => {
+        updateNote(note.id, { content });
     };
 
     return (
@@ -147,7 +152,15 @@ function KanbanCard({ note }: { note: Note }) {
                     </div>
                 </div>
 
-                <div className="text-sm line-clamp-3 mb-2" dangerouslySetInnerHTML={{ __html: note.content || "" }} />
+                <div className="text-sm line-clamp-3 mb-2 pointer-events-none">
+                    <NoteEditor
+                        content={note.content}
+                        onChange={handleContentChange}
+                        editable={false}
+                        className="text-sm"
+                        isLightBackground={isLightColor(note.color)}
+                    />
+                </div>
 
                 <div className="mt-auto flex items-center gap-2 text-xs opacity-70 pt-2 border-t border-black/5" onPointerDown={(e) => e.stopPropagation()}>
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
