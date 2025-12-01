@@ -177,6 +177,7 @@ export function FullscreenNote() {
                                 content={note.content}
                                 onChange={handleContentChange}
                                 className="min-h-[50vh] text-lg"
+                                isLightBackground={isLightColor(note.color)}
                             />
                         </div>
                     </div>

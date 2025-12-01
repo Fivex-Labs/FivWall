@@ -244,6 +244,7 @@ export function DraggableNote({ note }: DraggableNoteProps) {
                         content={note.content}
                         onChange={handleContentChange}
                         className="min-h-[100px]"
+                        isLightBackground={isLightColor(note.color)}
                     />
                 </div>
             </div>
