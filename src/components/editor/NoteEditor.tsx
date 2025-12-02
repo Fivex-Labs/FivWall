@@ -14,7 +14,7 @@ import { Link } from '@tiptap/extension-link';
 import { Placeholder } from '@tiptap/extension-placeholder';
 import { Extension } from '@tiptap/core';
 import Suggestion from '@tiptap/suggestion';
-import { useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { getSuggestionItems, renderSuggestion } from './suggestion';
 import { Bold, Italic, Strikethrough, Code, Link as LinkIcon } from 'lucide-react';
@@ -33,8 +33,8 @@ interface NoteEditorProps {
 }
 
 export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({ content, onChange, editable = true, className, isLightBackground = false }, ref) => {
-    const editor = useEditor({
-        extensions: [
+    const extensions = useMemo(() => {
+        const exts: any[] = [
             StarterKit,
             Image.configure({
                 inline: true,
@@ -57,33 +57,34 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({ conte
                 placeholder: "Write or press '/' for commands...",
                 emptyEditorClass: 'is-editor-empty',
             }),
-            Extension.create({
-                name: 'slash-command',
-                addOptions() {
-                    return {
-                        suggestion: {
-                            char: '/',
-                            command: ({ editor, range, props }: any) => {
-                                props.command({ editor, range });
-                            },
-                        },
-                    };
-                },
-                addProseMirrorPlugins() {
-                    return [
-                        Suggestion({
-                            editor: this.editor,
-                            ...this.options.suggestion,
-                        }),
-                    ];
-                },
-            }).configure({
-                suggestion: {
-                    items: getSuggestionItems,
-                    render: renderSuggestion,
-                },
-            }),
-        ],
+        ];
+
+        if (editable) {
+            exts.push(
+                Extension.create({
+                    name: 'slash-command',
+                    addProseMirrorPlugins() {
+                        return [
+                            Suggestion({
+                                editor: this.editor,
+                                char: '/',
+                                command: ({ editor, range, props }: any) => {
+                                    props.command({ editor, range });
+                                },
+                                items: getSuggestionItems,
+                                render: () => renderSuggestion(),
+                            }),
+                        ];
+                    },
+                })
+            );
+        }
+
+        return exts;
+    }, [editable]);
+
+    const editor = useEditor({
+        extensions,
         editable,
         onUpdate: ({ editor }) => {
             onChange(editor.getHTML());

@@ -152,7 +152,7 @@ function KanbanCard({ note }: { note: Note }) {
                     </div>
                 </div>
 
-                <div className="text-sm line-clamp-3 mb-2 pointer-events-none">
+                <div className="text-sm mb-2 pointer-events-none max-h-[300px] overflow-hidden">
                     <NoteEditor
                         content={note.content}
                         onChange={handleContentChange}
