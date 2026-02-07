@@ -357,7 +357,7 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
                         <div className="space-y-2">
                             <div className="flex items-start gap-3 p-3 bg-primary/5 border border-primary/20 rounded-lg">
                                 <img
-                                    src="/logos/5x-logo-square.webp"
+                                    src="https://www.fivexlabs.com/logos/fx-1024.png"
                                     alt="Fivex Labs"
                                     className="w-12 h-12 rounded flex-shrink-0"
                                 />
