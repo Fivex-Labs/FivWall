@@ -27,7 +27,13 @@ function formatLastSynced(timestamp: number): string {
     return date.toLocaleString();
 }
 
-export function SyncIndicator({ className }: { className?: string }) {
+export function SyncIndicator({
+    className,
+    isSidebarCollapsed,
+}: {
+    className?: string;
+    isSidebarCollapsed?: boolean;
+}) {
     const { isLoggedIn, syncStatus, lastSyncedAt, error } = useSyncStore();
     const [isRetrying, setIsRetrying] = React.useState(false);
 
@@ -42,38 +48,68 @@ export function SyncIndicator({ className }: { className?: string }) {
         }
     };
 
+    const syncedMessage = lastSyncedAt
+        ? `Last synced ${formatLastSynced(lastSyncedAt)}`
+        : "Synced";
+
     return (
         <div
             className={cn(
                 "flex items-center gap-2 text-sm text-muted-foreground",
+                isSidebarCollapsed && "justify-center",
                 className
             )}
+            title={
+                syncStatus === "syncing"
+                    ? "Syncing..."
+                    : syncStatus === "synced"
+                      ? syncedMessage
+                      : error || "Sync failed"
+            }
         >
             {syncStatus === "syncing" && (
                 <>
                     <Loader2 className="w-4 h-4 animate-spin shrink-0" />
-                    <span>Syncing...</span>
+                    {!isSidebarCollapsed && <span>Syncing...</span>}
                 </>
             )}
             {syncStatus === "synced" && lastSyncedAt && (
                 <>
                     <Check className="w-4 h-4 text-green-500 shrink-0" />
-                    <span>Saved to Google Drive {formatLastSynced(lastSyncedAt)}</span>
+                    {!isSidebarCollapsed && (
+                        <span>Last synced {formatLastSynced(lastSyncedAt)}</span>
+                    )}
                 </>
             )}
             {syncStatus === "error" && (
                 <>
-                    <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
-                    <span className="text-destructive">{error || "Sync failed"}</span>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleRetry}
-                        disabled={isRetrying}
-                        className="h-6 px-2 text-xs"
-                    >
-                        {isRetrying ? "Retrying..." : "Retry"}
-                    </Button>
+                    {isSidebarCollapsed ? (
+                        <button
+                            type="button"
+                            onClick={handleRetry}
+                            disabled={isRetrying}
+                            className="shrink-0 rounded p-0.5 text-destructive hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+                            title={isRetrying ? "Retrying..." : "Retry sync"}
+                        >
+                            <AlertCircle className="w-4 h-4" />
+                        </button>
+                    ) : (
+                        <>
+                            <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
+                            <span className="text-destructive truncate">
+                                {error || "Sync failed"}
+                            </span>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleRetry}
+                                disabled={isRetrying}
+                                className="h-6 px-2 text-xs shrink-0"
+                            >
+                                {isRetrying ? "Retrying..." : "Retry"}
+                            </Button>
+                        </>
+                    )}
                 </>
             )}
         </div>

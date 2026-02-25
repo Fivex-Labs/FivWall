@@ -47,7 +47,7 @@ export const useSyncStore = create<SyncStore>((set) => ({
     setSyncStatus: (syncStatus) =>
         set({
             syncStatus,
-            error: syncStatus === 'synced' ? null : undefined,
+            error: syncStatus === 'synced' || syncStatus === 'syncing' ? null : undefined,
         }),
 
     setLastSyncedAt: (lastSyncedAt) => set({ lastSyncedAt }),

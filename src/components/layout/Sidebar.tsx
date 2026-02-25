@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useNoteStore } from "@/store/useNoteStore";
 import { DataControls } from "@/components/layout/DataControls";
 import { ClientOnlyGoogleAuth } from "@/components/layout/ClientOnlyGoogleAuth";
+import { SyncIndicator } from "@/components/layout/SyncIndicator";
 
 export function Sidebar() {
     const { currentView, setView, isSidebarCollapsed, toggleSidebar } = useNoteStore();
@@ -145,7 +146,11 @@ export function Sidebar() {
             </div>
 
             <div className="mt-auto pt-4 border-t border-border space-y-1">
-                <div className={cn("mb-3", isSidebarCollapsed && "flex justify-center")}>
+                <div className={cn("mb-3", isSidebarCollapsed && "flex flex-col items-center")}>
+                    <SyncIndicator
+                        className="mb-2 text-xs"
+                        isSidebarCollapsed={isSidebarCollapsed}
+                    />
                     <ClientOnlyGoogleAuth isSidebarCollapsed={isSidebarCollapsed} />
                 </div>
                 <Button

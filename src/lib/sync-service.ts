@@ -71,6 +71,8 @@ async function push(retryCount = 0): Promise<void> {
 }
 
 function schedulePush(): void {
+    // Clear any previous error and show syncing as soon as user makes a change
+    useSyncStore.getState().setSyncStatus('syncing');
     if (debounceTimer) clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         debounceTimer = null;
