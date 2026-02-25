@@ -1,17 +1,17 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { NOTE_COLORS } from "@/constants/colors";
 import { cn } from "@/lib/utils";
-import { HelpCircle, LayoutGrid, Kanban } from "lucide-react";
+import { HelpCircle, LayoutGrid, Kanban, FileText, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNoteStore } from "@/store/useNoteStore";
 import { DataControls } from "@/components/layout/DataControls";
-import { HelpDialog } from "@/components/layout/HelpDialog";
+import { GoogleAuthButton } from "@/components/layout/GoogleAuthButton";
 
 export function Sidebar() {
     const { currentView, setView, isSidebarCollapsed, toggleSidebar } = useNoteStore();
-    const [showHelp, setShowHelp] = React.useState(false);
 
     const handleDragStart = (e: React.DragEvent, color: string) => {
         e.dataTransfer.setData("application/json", JSON.stringify({ type: "note", color }));
@@ -108,20 +108,19 @@ export function Sidebar() {
 
                 <div className={cn(
                     "grid gap-2 px-1 mb-6 pr-2 transition-all duration-300",
-                    isSidebarCollapsed ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
+                    isSidebarCollapsed ? "grid-cols-1" : "grid-cols-4 md:grid-cols-4"
                 )}>
                     {NOTE_COLORS.map((color) => (
                         <div
                             key={color.name}
-                            className="group relative flex cursor-grab items-center justify-center aspect-square"
+                            className="group relative flex cursor-grab items-center justify-center"
                             draggable
                             onDragStart={(e) => handleDragStart(e, color.value)}
                             title={`Drag to add ${color.name} note`}
                         >
                             <div
                                 className={cn(
-                                    "w-8 h-8 rounded-md shadow-sm transition-transform group-hover:scale-110 group-active:scale-95 ring-1 ring-white/10",
-                                    !isSidebarCollapsed && "md:w-full md:h-full",
+                                    "w-8 h-8 rounded-md shadow-sm transition-transform group-hover:scale-110 group-active:scale-95 ring-1 ring-white/10 shrink-0",
                                     color.name === 'Dark' ? 'border border-gray-600' : ''
                                 )}
                                 style={{ backgroundColor: color.value }}
@@ -145,20 +144,47 @@ export function Sidebar() {
                 */}
             </div>
 
-            <div className="mt-auto pt-4 border-t border-border">
+            <div className="mt-auto pt-4 border-t border-border space-y-1">
+                <div className={cn("mb-3", isSidebarCollapsed && "flex justify-center")}>
+                    <GoogleAuthButton isSidebarCollapsed={isSidebarCollapsed} />
+                </div>
                 <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowHelp(true)}
+                    asChild
                     className={cn("w-full justify-start text-muted-foreground hover:text-foreground", isSidebarCollapsed ? "px-2 justify-center" : "gap-2")}
                     title="Help"
                 >
-                    <HelpCircle className="w-4 h-4 shrink-0" />
-                    <span className={cn("whitespace-nowrap transition-all duration-300", isSidebarCollapsed ? "w-0 opacity-0 hidden" : "hidden md:inline")}>Help</span>
+                    <Link href="/help">
+                        <HelpCircle className="w-4 h-4 shrink-0" />
+                        <span className={cn("whitespace-nowrap transition-all duration-300", isSidebarCollapsed ? "w-0 opacity-0 hidden" : "hidden md:inline")}>Help</span>
+                    </Link>
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className={cn("w-full justify-start text-muted-foreground hover:text-foreground", isSidebarCollapsed ? "px-2 justify-center" : "gap-2")}
+                    title="Privacy Policy"
+                >
+                    <Link href="/privacy" className="flex items-center gap-2">
+                        <Shield className="w-4 h-4 shrink-0" />
+                        <span className={cn("whitespace-nowrap transition-all duration-300", isSidebarCollapsed ? "w-0 opacity-0 hidden" : "hidden md:inline")}>Privacy Policy</span>
+                    </Link>
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className={cn("w-full justify-start text-muted-foreground hover:text-foreground", isSidebarCollapsed ? "px-2 justify-center" : "gap-2")}
+                    title="Terms of Service"
+                >
+                    <Link href="/terms" className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 shrink-0" />
+                        <span className={cn("whitespace-nowrap transition-all duration-300", isSidebarCollapsed ? "w-0 opacity-0 hidden" : "hidden md:inline")}>Terms of Service</span>
+                    </Link>
                 </Button>
             </div>
-
-            <HelpDialog open={showHelp} onOpenChange={setShowHelp} />
         </aside>
     );
 }

@@ -8,17 +8,23 @@ import { useNoteStore } from "@/store/useNoteStore";
 import { FullscreenNote } from "@/components/wall/FullscreenNote";
 import { ColorFilter } from "@/components/layout/ColorFilter";
 import { MobileBlocker } from "@/components/layout/MobileBlocker";
+import { SyncIndicator } from "@/components/layout/SyncIndicator";
+import { FirstTimeSyncDialog } from "@/components/layout/FirstTimeSyncDialog";
+import { useSyncOnChange } from "@/hooks/useSyncOnChange";
 
 import { cn } from "@/lib/utils";
 
 export default function Home() {
   const { currentView, isSidebarCollapsed } = useNoteStore();
+  useSyncOnChange();
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       <MobileBlocker />
       <SearchCommand />
       <ColorFilter />
+      <SyncIndicator className="fixed top-4 right-4 z-50 bg-card/80 backdrop-blur-sm px-3 py-2 rounded-lg border shadow-sm" />
+      <FirstTimeSyncDialog />
       <Sidebar />
       <main
         className={cn(
