@@ -8,7 +8,7 @@ import { HelpCircle, LayoutGrid, Kanban, FileText, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNoteStore } from "@/store/useNoteStore";
 import { DataControls } from "@/components/layout/DataControls";
-import { GoogleAuthButton } from "@/components/layout/GoogleAuthButton";
+import { ClientOnlyGoogleAuth } from "@/components/layout/ClientOnlyGoogleAuth";
 
 export function Sidebar() {
     const { currentView, setView, isSidebarCollapsed, toggleSidebar } = useNoteStore();
@@ -146,7 +146,7 @@ export function Sidebar() {
 
             <div className="mt-auto pt-4 border-t border-border space-y-1">
                 <div className={cn("mb-3", isSidebarCollapsed && "flex justify-center")}>
-                    <GoogleAuthButton isSidebarCollapsed={isSidebarCollapsed} />
+                    <ClientOnlyGoogleAuth isSidebarCollapsed={isSidebarCollapsed} />
                 </div>
                 <Button
                     variant="ghost"

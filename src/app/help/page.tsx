@@ -298,14 +298,21 @@ export default function HelpPage() {
                                 <Cloud className="w-5 h-5 text-cyan-500" />
                                 Google Drive Sync
                             </h2>
-                            <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl space-y-2">
+                            <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl space-y-3">
                                 <p className="text-sm text-muted-foreground">
                                     Sign in with Google to sync your notes to a dedicated FivWall folder in your Google Drive.
-                                    Your data stays in your Drive—we only access files FivWall creates. Sync happens automatically
-                                    when you make changes, and you can see the last sync time in the top-right corner.
+                                    Sync happens automatically when you make changes, and you can see the last sync time in the top-right corner.
                                 </p>
+                                <div className="p-3 bg-background/50 rounded-lg border border-cyan-500/20">
+                                    <p className="text-sm font-medium text-cyan-700 dark:text-cyan-400 mb-1">
+                                        We value your privacy
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        You own the data within your own Google Drive. FivWall does not read or store your data on our servers—your notes stay in your Drive, and we only access the FivWall folder we create for sync.
+                                    </p>
+                                </div>
                                 <p className="text-xs text-muted-foreground">
-                                    Sidebar → Login with Google
+                                    Sidebar → Sign in with Google (above Help)
                                 </p>
                             </div>
                         </section>
