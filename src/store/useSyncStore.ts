@@ -47,6 +47,7 @@ export const useSyncStore = create<SyncStore>((set) => ({
     setSyncStatus: (syncStatus) =>
         set({
             syncStatus,
+            // Explicitly clear error when syncing or synced (undefined can be skipped by Zustand)
             error: syncStatus === 'synced' || syncStatus === 'syncing' ? null : undefined,
         }),
 

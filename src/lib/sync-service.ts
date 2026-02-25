@@ -20,6 +20,7 @@ const DEBOUNCE_MS = 2500;
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let lastPushedState: string | null = null;
+let syncGeneration = 0;
 
 function getSerializedState(): string {
     const state = useNoteStore.getState();
@@ -48,6 +49,7 @@ async function push(retryCount = 0): Promise<void> {
     const serialized = getSerializedState();
     if (serialized === lastPushedState) return;
 
+    const myGeneration = syncGeneration;
     useSyncStore.getState().setSyncStatus('syncing');
     useSyncStore.getState().setError(null);
 
@@ -66,20 +68,20 @@ async function push(retryCount = 0): Promise<void> {
             return;
         }
         // Only show "Sync failed" when the PATCH (actual write) has failed.
-        // GET/prepare failures: retry without showing error.
         const isWriteFailure = err instanceof UploadWriteError;
         if (retryCount < MAX_RETRIES) {
             await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
             return push(retryCount + 1);
         }
-        if (isWriteFailure) {
+        // Don't set error if a newer sync has been scheduled (user made change)
+        if (isWriteFailure && myGeneration === syncGeneration) {
             useSyncStore.getState().setError(message);
         }
-        // For prepare failures after retries: don't set error, stay in syncing (will retry on next change)
     }
 }
 
 function schedulePush(): void {
+    syncGeneration += 1;
     // Clear any previous error and show syncing as soon as user makes a change
     useSyncStore.getState().setSyncStatus('syncing');
     if (debounceTimer) clearTimeout(debounceTimer);
