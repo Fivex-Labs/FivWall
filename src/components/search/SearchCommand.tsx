@@ -68,7 +68,7 @@ export function SearchCommand() {
         <>
             <button
                 onClick={() => setOpen(true)}
-                className="fixed top-4 right-4 z-50 flex items-center gap-2 rounded-full bg-card/80 px-4 py-2 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-card hover:text-foreground border border-border"
+                className="fixed top-4 right-4 z-[10000] flex items-center gap-2 rounded-full bg-card/80 px-4 py-2 text-sm font-medium text-muted-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-card hover:text-foreground border border-border"
             >
                 <Search className="h-4 w-4" />
                 <span className="hidden sm:inline">Search...</span>
@@ -79,7 +79,7 @@ export function SearchCommand() {
 
             <AnimatePresence>
                 {open && (
-                    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh]">
+                    <div className="fixed inset-0 z-[10000] flex items-start justify-center pt-[20vh]">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -91,7 +91,7 @@ export function SearchCommand() {
                             initial={{ opacity: 0, scale: 0.95, y: -20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                            className="relative w-full max-w-lg overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
+                            className="relative z-[10001] w-full max-w-lg overflow-hidden rounded-xl border border-border bg-popover shadow-2xl"
                         >
                             <Command shouldFilter={false} className="flex h-full w-full flex-col overflow-hidden rounded-xl bg-popover text-popover-foreground">
                                 <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
