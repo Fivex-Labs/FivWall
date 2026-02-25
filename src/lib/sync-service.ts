@@ -36,7 +36,9 @@ function getPayload() {
     };
 }
 
-async function push(): Promise<void> {
+const RETRY_DELAY_MS = 1500;
+
+async function push(retryCount = 0): Promise<void> {
     if (!isAuthenticated()) return;
 
     const serialized = getSerializedState();
@@ -52,6 +54,10 @@ async function push(): Promise<void> {
         useSyncStore.getState().setSyncStatus('synced');
         useSyncStore.getState().setLastSyncedAt(Date.now());
     } catch (err) {
+        if (retryCount < 1) {
+            await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+            return push(retryCount + 1);
+        }
         const message = err instanceof Error ? err.message : 'Sync failed';
         useSyncStore.getState().setError(message);
     }
