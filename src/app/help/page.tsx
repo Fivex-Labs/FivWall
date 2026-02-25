@@ -40,6 +40,7 @@ const SECTIONS = [
     { id: "sync", label: "Google Drive Sync" },
     { id: "use-cases", label: "Use Cases" },
     { id: "shortcuts", label: "Keyboard Shortcuts" },
+    { id: "open-source", label: "Open Source" },
     { id: "credits", label: "Credits" },
 ];
 
@@ -351,6 +352,29 @@ export default function HelpPage() {
                                     <span className="text-sm">Close Search/Dialog</span>
                                     <kbd className="px-2 py-1 bg-background border rounded text-xs font-mono">Esc</kbd>
                                 </div>
+                            </div>
+                        </section>
+
+                        <section id="open-source" data-help-section className="space-y-4 pt-8 border-t">
+                            <h2 className="text-xl font-semibold flex items-center gap-2">
+                                <ExternalLink className="w-5 h-5 text-primary" />
+                                Open Source
+                            </h2>
+                            <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl space-y-3">
+                                <p className="text-sm text-muted-foreground">
+                                    FivWall is <strong>open source</strong>. The code is publicly available so you can verify how your data is handled. We believe in transparency—especially for a privacy-focused app.
+                                </p>
+                                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                                    <li>View and audit the source code</li>
+                                    <li>Contribute improvements or report issues</li>
+                                    <li>Fork and customize for your needs</li>
+                                </ul>
+                                <Button variant="outline" size="sm" asChild className="gap-2">
+                                    <a href="https://github.com/fivexlabs/fivwall" target="_blank" rel="noopener noreferrer">
+                                        <ExternalLink className="w-3 h-3" />
+                                        View on GitHub
+                                    </a>
+                                </Button>
                             </div>
                         </section>
 
