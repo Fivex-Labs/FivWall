@@ -38,8 +38,11 @@ export async function POST(request: NextRequest) {
         }
 
         const allowedUris = getRedirectUris();
+        const origin = request.headers.get('origin') ?? undefined;
+        // Use client's redirect_uri if it matches Origin (same-origin request) or is in allowed list
         const redirectUri =
-            clientRedirectUri && allowedUris.includes(clientRedirectUri)
+            clientRedirectUri &&
+            (allowedUris.includes(clientRedirectUri) || origin === clientRedirectUri)
                 ? clientRedirectUri
                 : allowedUris[0];
 
