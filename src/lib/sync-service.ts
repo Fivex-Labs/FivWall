@@ -51,7 +51,6 @@ async function push(retryCount = 0): Promise<void> {
 
     const myGeneration = syncGeneration;
     useSyncStore.getState().setSyncStatus('syncing');
-    useSyncStore.getState().setError(null);
 
     try {
         const payload = getPayload();
