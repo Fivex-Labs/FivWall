@@ -6,7 +6,9 @@
 import { useNoteStore } from '@/store/useNoteStore';
 import { useSyncStore } from '@/store/useSyncStore';
 import {
-    uploadData,
+    prepareUploadContext,
+    executeUpload,
+    UploadWriteError,
     downloadData,
     isAuthenticated,
     setAccessToken,
@@ -51,7 +53,8 @@ async function push(retryCount = 0): Promise<void> {
 
     try {
         const payload = getPayload();
-        await uploadData(payload);
+        const { folderId, fileId } = await prepareUploadContext();
+        await executeUpload(folderId, fileId, payload);
         lastPushedState = serialized;
         useSyncStore.getState().setSyncStatus('synced');
         useSyncStore.getState().setLastSyncedAt(Date.now());
@@ -62,11 +65,17 @@ async function push(retryCount = 0): Promise<void> {
             useSyncStore.getState().setError(message);
             return;
         }
+        // Only show "Sync failed" when the PATCH (actual write) has failed.
+        // GET/prepare failures: retry without showing error.
+        const isWriteFailure = err instanceof UploadWriteError;
         if (retryCount < MAX_RETRIES) {
             await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
             return push(retryCount + 1);
         }
-        useSyncStore.getState().setError(message);
+        if (isWriteFailure) {
+            useSyncStore.getState().setError(message);
+        }
+        // For prepare failures after retries: don't set error, stay in syncing (will retry on next change)
     }
 }
 

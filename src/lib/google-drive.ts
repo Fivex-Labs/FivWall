@@ -166,21 +166,34 @@ async function findDataFile(folderId: string): Promise<string | null> {
     return files.length > 0 ? files[0].id : null;
 }
 
+/** Thrown only when the PATCH/POST (actual write) fails. Used to distinguish from GET failures. */
+export class UploadWriteError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'UploadWriteError';
+    }
+}
+
 /**
- * Upload data to Google Drive.
+ * Prepare upload context (folder + file IDs). GETs only - no write.
  */
-export async function uploadData(payload: {
-    version: number;
-    timestamp: number;
-    notes: unknown[];
-    recentSearches: string[];
-}): Promise<void> {
+export async function prepareUploadContext(): Promise<{ folderId: string; fileId: string | null }> {
     const folderId = await getOrCreateFivWallFolder();
     const fileId = await findDataFile(folderId);
+    return { folderId, fileId };
+}
+
+/**
+ * Execute the actual write (PATCH or POST). Only this phase can produce "Sync failed".
+ */
+export async function executeUpload(
+    folderId: string,
+    fileId: string | null,
+    payload: { version: number; timestamp: number; notes: unknown[]; recentSearches: string[] }
+): Promise<void> {
     const body = JSON.stringify(payload);
 
     if (fileId) {
-        // Update existing file
         const updateUrl = `${DRIVE_UPLOAD_BASE}/files/${fileId}?uploadType=media`;
         const res = await driveFetch(updateUrl, {
             method: 'PATCH',
@@ -189,10 +202,9 @@ export async function uploadData(payload: {
         });
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Upload failed: ${res.status}`);
+            throw new UploadWriteError(err.error?.message || `Upload failed: ${res.status}`);
         }
     } else {
-        // Create new file via multipart upload
         const boundary = 'fivwall_boundary_' + Date.now();
         const metadata = JSON.stringify({
             name: DATA_FILE_NAME,
@@ -219,9 +231,22 @@ export async function uploadData(payload: {
 
         if (!createRes.ok) {
             const err = await createRes.json().catch(() => ({}));
-            throw new Error(err.error?.message || `Create file failed: ${createRes.status}`);
+            throw new UploadWriteError(err.error?.message || `Create file failed: ${createRes.status}`);
         }
     }
+}
+
+/**
+ * Upload data to Google Drive. Combines prepare + execute.
+ */
+export async function uploadData(payload: {
+    version: number;
+    timestamp: number;
+    notes: unknown[];
+    recentSearches: string[];
+}): Promise<void> {
+    const { folderId, fileId } = await prepareUploadContext();
+    await executeUpload(folderId, fileId, payload);
 }
 
 /**
