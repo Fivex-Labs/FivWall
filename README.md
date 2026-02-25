@@ -74,21 +74,28 @@ npm start
 
 ## Google Drive Sync
 
-FivWall can sync your notes to a dedicated folder in your Google Drive. This is **optional** and **opt-in**.
+FivWall can sync your notes to a dedicated folder in your Google Drive. This is **optional** and **opt-in**. Sessions persist across browser restarts using refresh tokens.
 
 1. Create a project in [Google Cloud Console](https://console.cloud.google.com)
 2. Enable **Google Drive API**
-3. Configure OAuth consent screen (External) and add `drive.file` scope
+3. Configure OAuth consent screen (External) and add `drive.file`, `userinfo.email`, `userinfo.profile` scopes
 4. Create an **OAuth 2.0 Client ID** (Web application)
-5. Add `NEXT_PUBLIC_GOOGLE_CLIENT_ID` to your environment
+5. Add **Authorized JavaScript origins**: `http://localhost:3000` (dev) and your production URL (e.g. `https://your-app.vercel.app`)
+6. Add **Authorized redirect URIs**: same as above (`http://localhost:3000`, `https://your-app.vercel.app`)
+7. Create a **Client secret** (download JSON or copy from Console) — required for refresh tokens
 
 Create a `.env.local` file:
 
 ```env
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+# Optional: comma-separated redirect URIs (defaults to NEXT_PUBLIC_APP_URL or localhost)
+# GOOGLE_REDIRECT_URIS=http://localhost:3000,https://your-app.vercel.app
+# Optional: for production, set your app URL
+# NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
 ```
 
-Without this variable, the app runs fully local—the Sign in with Google button simply won't appear.
+Without `NEXT_PUBLIC_GOOGLE_CLIENT_ID`, the app runs fully local—the Sign in with Google button won't appear. Without `GOOGLE_CLIENT_SECRET`, login will fail (refresh tokens require server-side token exchange).
 
 ---
 
@@ -98,8 +105,12 @@ Without this variable, the app runs fully local—the Sign in with Google button
 
 1. Push your repo to GitHub
 2. Import the project in [Vercel](https://vercel.com)
-3. Add `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in Project Settings → Environment Variables (if using sync)
-4. Deploy
+3. Add environment variables (if using sync):
+   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `NEXT_PUBLIC_APP_URL` (e.g. `https://your-app.vercel.app`)
+4. Add your production URL to Google Cloud Console **Authorized redirect URIs**
+5. Deploy
 
 ### Other platforms
 

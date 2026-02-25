@@ -1,10 +1,14 @@
 /**
  * Google Drive API client for FivWall sync.
- * Uses OAuth 2.0 token model (no backend required).
+ * Uses OAuth 2.0 with refresh tokens for persistent sessions.
  * Scope: drive.file - only app-created files are accessible.
  */
 
+import { useSyncStore } from '@/store/useSyncStore';
+import { loadAuth, saveAuth, clearAuth } from './auth-storage';
+
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
+const REFRESH_BUFFER_MS = 5 * 60 * 1000; // Refresh 5 min before expiry
 const DRIVE_UPLOAD_BASE = 'https://www.googleapis.com/upload/drive/v3';
 const FIVWALL_FOLDER_NAME = 'FivWall';
 const DATA_FILE_NAME = 'fivwall-data.json';
@@ -30,18 +34,79 @@ export function isAuthenticated(): boolean {
     return !!accessToken;
 }
 
+async function refreshAccessToken(): Promise<boolean> {
+    const stored = loadAuth();
+    if (!stored?.refreshToken) return false;
+
+    try {
+        const res = await fetch('/api/auth/google/refresh', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: stored.refreshToken }),
+        });
+        const data = (await res.json()) as {
+            access_token?: string;
+            expires_in?: number;
+            error?: string;
+        };
+        if (!res.ok || !data.access_token) return false;
+
+        const expiresIn = data.expires_in ?? 3600;
+        accessToken = data.access_token;
+        saveAuth({
+            ...stored,
+            accessToken: data.access_token,
+            expiresAt: Date.now() + expiresIn * 1000,
+        });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function ensureValidToken(): Promise<void> {
+    if (!accessToken) throw new Error('Not authenticated');
+
+    const stored = loadAuth();
+    if (!stored?.refreshToken) return;
+
+    const now = Date.now();
+    if (stored.expiresAt > now + REFRESH_BUFFER_MS) return;
+
+    const ok = await refreshAccessToken();
+    if (!ok) {
+        accessToken = null;
+        clearAuth();
+        useSyncStore.getState().logout();
+        throw new Error('Session expired. Please sign in again.');
+    }
+}
+
 async function driveFetch(
     url: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retried = false
 ): Promise<Response> {
-    if (!accessToken) {
-        throw new Error('Not authenticated');
-    }
+    await ensureValidToken();
+    if (!accessToken) throw new Error('Not authenticated');
+
     const headers: HeadersInit = {
         Authorization: `Bearer ${accessToken}`,
         ...(options.headers as Record<string, string>),
     };
-    return fetch(url, { ...options, headers });
+    const res = await fetch(url, { ...options, headers });
+
+    if (res.status === 401 && !retried) {
+        const ok = await refreshAccessToken();
+        if (ok) return driveFetch(url, options, true);
+        accessToken = null;
+        clearAuth();
+        useSyncStore.getState().logout();
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || 'Session expired. Please sign in again.');
+    }
+
+    return res;
 }
 
 /**

@@ -54,30 +54,61 @@ export function GoogleAuthButton({
     const [imgError, setImgError] = React.useState(false);
 
     const login = useGoogleLogin({
-        flow: "implicit",
+        flow: "auth-code",
         scope: `${DRIVE_SCOPE} ${EMAIL_SCOPE} ${PROFILE_SCOPE}`,
-        onSuccess: async (tokenResponse) => {
+        // Request refresh token for persistent sessions (passed to underlying GSI)
+        ...({ access_type: "offline", prompt: "consent" } as Record<string, string>),
+        onSuccess: async (codeResponse) => {
             setIsLoading(true);
             try {
+                const code = (codeResponse as { code?: string }).code;
+                if (!code) {
+                    setIsLoading(false);
+                    return;
+                }
+                const tokenRes = await fetch("/api/auth/google", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        code,
+                        redirect_uri: typeof window !== "undefined" ? window.location.origin : undefined,
+                    }),
+                });
+                const tokenData = (await tokenRes.json()) as {
+                    access_token?: string;
+                    refresh_token?: string | null;
+                    expires_in?: number;
+                    error?: string;
+                };
+                if (!tokenRes.ok || !tokenData.access_token) {
+                    console.error("Token exchange failed:", tokenData.error ?? tokenRes.statusText);
+                    setIsLoading(false);
+                    return;
+                }
                 let email: string | null = null;
                 let name: string | null = null;
                 let picture: string | null = null;
-                if (tokenResponse.access_token) {
-                    try {
-                        const res = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-                            headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-                        });
-                        if (res.ok) {
-                            const data = await res.json();
-                            email = data.email ?? null;
-                            name = data.name ?? null;
-                            picture = data.picture ?? null;
-                        }
-                    } catch {
-                        // Ignore
+                try {
+                    const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+                        headers: { Authorization: `Bearer ${tokenData.access_token}` },
+                    });
+                    if (userRes.ok) {
+                        const data = await userRes.json();
+                        email = data.email ?? null;
+                        name = data.name ?? null;
+                        picture = data.picture ?? null;
                     }
-                    handleLoginSuccess(tokenResponse.access_token, email, name, picture);
+                } catch {
+                    // Ignore
                 }
+                handleLoginSuccess(
+                    tokenData.access_token,
+                    email,
+                    name,
+                    picture,
+                    tokenData.refresh_token ?? null,
+                    tokenData.expires_in ?? 3600
+                );
             } finally {
                 setIsLoading(false);
             }

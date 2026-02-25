@@ -12,6 +12,7 @@ import {
     setAccessToken,
     revokeAccess,
 } from './google-drive';
+import { saveAuth, loadAuth, clearAuth } from './auth-storage';
 
 const DEBOUNCE_MS = 2500;
 
@@ -36,7 +37,8 @@ function getPayload() {
     };
 }
 
-const RETRY_DELAY_MS = 1500;
+const RETRY_DELAY_MS = 2000;
+const MAX_RETRIES = 2;
 
 async function push(retryCount = 0): Promise<void> {
     if (!isAuthenticated()) return;
@@ -54,11 +56,16 @@ async function push(retryCount = 0): Promise<void> {
         useSyncStore.getState().setSyncStatus('synced');
         useSyncStore.getState().setLastSyncedAt(Date.now());
     } catch (err) {
-        if (retryCount < 1) {
+        const message = err instanceof Error ? err.message : 'Sync failed';
+        // Don't retry on auth errors (401) - user needs to sign in again
+        if (message.includes('Session expired') || message.includes('sign in again')) {
+            useSyncStore.getState().setError(message);
+            return;
+        }
+        if (retryCount < MAX_RETRIES) {
             await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
             return push(retryCount + 1);
         }
-        const message = err instanceof Error ? err.message : 'Sync failed';
         useSyncStore.getState().setError(message);
     }
 }
@@ -129,10 +136,21 @@ export function handleLoginSuccess(
     accessToken: string,
     email?: string | null,
     name?: string | null,
-    picture?: string | null
+    picture?: string | null,
+    refreshToken?: string | null,
+    expiresIn?: number
 ): void {
     setAccessToken(accessToken);
     useSyncStore.getState().login(email, name, picture);
+    const expiresAt = expiresIn ? Date.now() + expiresIn * 1000 : 0;
+    saveAuth({
+        accessToken,
+        refreshToken: refreshToken ?? null,
+        expiresAt,
+        email: email ?? null,
+        name: name ?? null,
+        picture: picture ?? null,
+    });
     lastPushedState = null;
 
     void (async () => {
@@ -185,6 +203,30 @@ export function resolveFirstTimeSyncChoice(choice: 'push' | 'pull'): void {
 
 export async function handleLogout(): Promise<void> {
     await revokeAccess();
+    clearAuth();
     useSyncStore.getState().logout();
     lastPushedState = null;
+}
+
+/**
+ * Restore session from localStorage. Called on app load.
+ * Does NOT run first-time sync dialog - only restores state and pulls.
+ */
+export function restoreSession(): void {
+    const stored = loadAuth();
+    if (!stored?.accessToken) return;
+
+    setAccessToken(stored.accessToken);
+    useSyncStore.getState().login(stored.email, stored.name, stored.picture);
+    // expiresAt and refreshToken used by google-drive for token refresh
+
+    if (isAuthenticated()) {
+        void (async () => {
+            try {
+                await pull();
+            } catch {
+                // Token may be expired; 401 handled in driveFetch
+            }
+        })();
+    }
 }

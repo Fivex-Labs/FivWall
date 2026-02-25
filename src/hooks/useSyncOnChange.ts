@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect } from 'react';
-import { initSyncService, triggerPull } from '@/lib/sync-service';
+import { initSyncService, triggerPull, restoreSession } from '@/lib/sync-service';
 import { isAuthenticated } from '@/lib/google-drive';
 
 /**
- * Initializes the sync service when the user is logged in.
- * Subscribes to the note store and debounces pushes to Google Drive.
- * Pulls on tab focus when online.
+ * Restores persisted session, initializes sync service, pulls on tab focus.
  */
 export function useSyncOnChange() {
     useEffect(() => {
+        restoreSession();
         const cleanup = initSyncService();
 
         const handleVisibilityChange = () => {
